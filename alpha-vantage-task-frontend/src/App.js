@@ -83,7 +83,7 @@ function App() {
 
   return (
     <div className="App">
-      <h1>Daily Average API</h1>
+      <h1>Commodity Average API</h1>
       <div>
         <label>
           Resource:
