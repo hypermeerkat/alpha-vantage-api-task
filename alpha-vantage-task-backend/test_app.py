@@ -16,7 +16,7 @@ def test_daily_average_missing_dates(client):
 def test_daily_average_invalid_function(client):
     response = client.get('/daily_average?function=INVALID&start_date=2023-01-01&end_date=2023-12-31')
     assert response.status_code == 400
-    assert "No data available from API" in response.json['error']
+    assert "Invalid resource: INVALID" in response.json['error']
 
 def test_daily_average_valid_request(client, mocker):
     mock_data = {
@@ -32,7 +32,7 @@ def test_daily_average_valid_request(client, mocker):
     assert response.status_code == 200
     assert response.json['function'] == 'WTI'
     assert response.json['average_price'] == 72.33
-    assert response.json['currency'] == 'USD per barrel'
+    assert response.json['currency'] == 'USD per unit'
 
 def test_calculate_daily_average():
     data = {
