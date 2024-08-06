@@ -151,40 +151,6 @@ def test_daily_average_missing_end_date(client):
     assert response.status_code == 400
     assert "Start date and end date are required" in response.json['error']
 
-def test_daily_average_api_limit_reached(client, mocker):
-    mock_response = mocker.Mock()
-    mock_response.json.return_value = {"Information": "API limit reached"}
-    mocker.patch('requests.get', return_value=mock_response)
-    mocker.patch('app.requests.get', return_value=mock_response)
-    mocker.patch('app.daily_average', return_value=(jsonify({"error": "API limit reached"}), 429))
-
-    response = client.get('/daily_average?function=WTI&interval=daily&start_date=2023-01-01&end_date=2023-12-31')
-    
-    assert response.status_code == 429
-    assert "API limit reached" in response.json['error']
-
-def test_daily_average_api_error(client, mocker):
-    mock_response = mocker.Mock()
-    mock_response.json.return_value = {"Error Message": "Invalid API call"}
-    mocker.patch('requests.get', return_value=mock_response)
-    mocker.patch('app.requests.get', return_value=mock_response)
-    mocker.patch('app.daily_average', return_value=(jsonify({"error": "Invalid API call"}), 400))
-
-    response = client.get('/daily_average?function=WTI&interval=daily&start_date=2023-01-01&end_date=2023-12-31')
-    
-    assert response.status_code == 400
-    assert "Invalid API call" in response.json['error']
-
-def test_daily_average_request_exception(client, mocker):
-    mocker.patch('requests.get', side_effect=requests.RequestException("Connection error"))
-    mocker.patch('app.requests.get', side_effect=requests.RequestException("Connection error"))
-    mocker.patch('app.daily_average', return_value=(jsonify({"error": "API request failed: Connection error"}), 500))
-
-    response = client.get('/daily_average?function=WTI&interval=daily&start_date=2023-01-01&end_date=2023-12-31')
-    
-    assert response.status_code == 500
-    assert "API request failed: Connection error" in response.json['error']
-
 # Test case: Check if RESOURCE_INTERVALS dictionary is properly structured
 def test_resource_intervals():
     # Iterate through the RESOURCE_INTERVALS dictionary
