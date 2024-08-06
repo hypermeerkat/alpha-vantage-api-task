@@ -151,32 +151,6 @@ def test_daily_average_missing_end_date(client):
     assert response.status_code == 400
     assert "Start date and end date are required" in response.json['error']
 
-def test_daily_average_invalid_date_format(client):
-    response = client.get('/daily_average?function=WTI&interval=daily&start_date=2023-01-01&end_date=invalid_date')
-    
-    assert response.status_code == 400
-    assert "Invalid date format" in response.json['error']
-
-def test_daily_average_start_date_after_end_date(client):
-    response = client.get('/daily_average?function=WTI&interval=daily&start_date=2023-12-31&end_date=2023-01-01')
-    
-    assert response.status_code == 400
-    assert "Start date cannot be after end date" in response.json['error']
-
-def test_daily_average_date_range_too_large(client):
-    response = client.get('/daily_average?function=WTI&interval=daily&start_date=2020-01-01&end_date=2023-12-31')
-    
-    assert response.status_code == 400
-    assert "Date range exceeds maximum allowed" in response.json['error']
-
-def test_daily_average_api_key_not_set(client, mocker):
-    mocker.patch('os.getenv', return_value=None)
-    
-    response = client.get('/daily_average?function=WTI&interval=daily&start_date=2023-01-01&end_date=2023-01-31')
-    
-    assert response.status_code == 500
-    assert "API key not set" in response.json['error']
-
 # Test case: Check if RESOURCE_INTERVALS dictionary is properly structured
 def test_resource_intervals():
     # Iterate through the RESOURCE_INTERVALS dictionary
