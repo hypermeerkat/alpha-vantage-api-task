@@ -1,6 +1,7 @@
 import pytest
 from app import app, RESOURCE_INTERVALS
 import requests
+from utils import calculate_daily_average, print_api_data
 
 @pytest.fixture
 def client():
@@ -109,11 +110,11 @@ def test_daily_average_missing_end_date(client):
     assert response.status_code == 400
     assert "Start date and end date are required" in response.json['error']
 
-# Test case: Check if API handles reaching the API limit correctly
 def test_daily_average_api_limit_reached(client, mocker):
     mock_response = mocker.Mock()
     mock_response.json.return_value = {"Information": "API limit reached"}
     mocker.patch('requests.get', return_value=mock_response)
+    mocker.patch('app.requests.get', return_value=mock_response)
 
     response = client.get('/daily_average?function=WTI&interval=daily&start_date=2023-01-01&end_date=2023-12-31')
     assert response.status_code == 429
@@ -124,6 +125,7 @@ def test_daily_average_api_error(client, mocker):
     mock_response = mocker.Mock()
     mock_response.json.return_value = {"Error Message": "Invalid API call"}
     mocker.patch('requests.get', return_value=mock_response)
+    mocker.patch('app.requests.get', return_value=mock_response)
 
     response = client.get('/daily_average?function=WTI&interval=daily&start_date=2023-01-01&end_date=2023-12-31')
     assert response.status_code == 400
@@ -132,7 +134,8 @@ def test_daily_average_api_error(client, mocker):
 # Test case: Verify API handles request exceptions properly
 def test_daily_average_request_exception(client, mocker):
     mocker.patch('requests.get', side_effect=requests.RequestException("Connection error"))
-
+    mocker.patch('app.requests.get', side_effect=requests.RequestException("Connection error"))
+    
     response = client.get('/daily_average?function=WTI&interval=daily&start_date=2023-01-01&end_date=2023-12-31')
     assert response.status_code == 500
     assert "API request failed: Connection error" in response.json['error']
