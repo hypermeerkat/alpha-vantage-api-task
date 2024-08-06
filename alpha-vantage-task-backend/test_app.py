@@ -1,8 +1,13 @@
 import pytest
 from flask import jsonify
-from app import app, RESOURCE_INTERVALS
+from unittest.mock import Mock
+from app import app, RESOURCE_INTERVALS, Cache
 import requests
 from utils import calculate_daily_average, print_api_data
+
+# Mock the Cache object
+app.config['CACHE_TYPE'] = 'null'
+Cache(app)
 
 @pytest.fixture
 def client():
