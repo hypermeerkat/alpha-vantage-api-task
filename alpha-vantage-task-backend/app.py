@@ -8,6 +8,7 @@ import os
 from flask_caching import Cache
 from flask.logging import create_logger
 import json
+from flask_cors import CORS
 
 # Load environment variables from .env file
 load_dotenv()
@@ -17,6 +18,7 @@ app = Flask(__name__)
 app.config['CACHE_TYPE'] = 'simple'
 cache = Cache(app)
 app_logger = create_logger(app)
+CORS(app)
 
 # Define available resources and their corresponding intervals
 RESOURCE_INTERVALS = {
