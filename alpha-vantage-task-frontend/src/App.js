@@ -59,7 +59,8 @@ function App() {
       });
       
       if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
+        const errorData = await response.json();
+        throw new Error(errorData.error || `HTTP error! status: ${response.status}`);
       }
       
       const data = await response.json();
@@ -144,20 +145,25 @@ function App() {
         {isLoading ? 'Loading...' : 'Fetch Data'}
       </button>
       {error && (
-        <div className="error">
-          <h3>Error:</h3>
-          <p>{error}</p>
-          {error.includes('API limit reached') && (
-            <p>
-              Consider upgrading your API plan or waiting before making more requests.
-              You can find more information about API limits at{' '}
-              <a href="https://www.alphavantage.co/premium/" target="_blank" rel="noopener noreferrer">
-                Alpha Vantage Premium
-              </a>
-            </p>
-          )}
-        </div>
-      )}
+  <div className="error">
+    <h3>Error:</h3>
+    <p>{error}</p>
+    {error.includes('API limit reached') && (
+      <p>
+        Consider upgrading your API plan or waiting before making more requests.
+        You can find more information about API limits at{' '}
+        <a href="https://www.alphavantage.co/premium/" target="_blank" rel="noopener noreferrer">
+          Alpha Vantage Premium
+        </a>
+      </p>
+    )}
+    {error.includes('No valid data available') && (
+      <p>
+        The selected date range might be too recent or in the future. Please try selecting an earlier date range.
+      </p>
+    )}
+  </div>
+)}
       {isLoading && <p className="loading">Loading data...</p>}
       {result && (
         <div className="result">
