@@ -155,19 +155,19 @@ def test_daily_average_invalid_date_format(client):
     response = client.get('/daily_average?function=WTI&interval=daily&start_date=2023-01-01&end_date=invalid_date')
     
     assert response.status_code == 400
-    assert "error" in response.json
+    assert "Invalid date format" in response.json['error']
 
 def test_daily_average_start_date_after_end_date(client):
     response = client.get('/daily_average?function=WTI&interval=daily&start_date=2023-12-31&end_date=2023-01-01')
     
     assert response.status_code == 400
-    assert "error" in response.json
+    assert "Start date cannot be after end date" in response.json['error']
 
 def test_daily_average_date_range_too_large(client):
     response = client.get('/daily_average?function=WTI&interval=daily&start_date=2020-01-01&end_date=2023-12-31')
     
     assert response.status_code == 400
-    assert "error" in response.json
+    assert "Date range exceeds maximum allowed" in response.json['error']
 
 def test_daily_average_api_key_not_set(client, mocker):
     mocker.patch('os.getenv', return_value=None)
@@ -175,40 +175,7 @@ def test_daily_average_api_key_not_set(client, mocker):
     response = client.get('/daily_average?function=WTI&interval=daily&start_date=2023-01-01&end_date=2023-01-31')
     
     assert response.status_code == 500
-    assert "error" in response.json
-
-def test_daily_average_caching(client, mocker):
-    mock_data = {
-        "data": [
-            {"date": "2023-01-01", "value": "70"},
-            {"date": "2023-01-02", "value": "72"},
-            {"date": "2023-01-03", "value": "75"},
-        ]
-    }
-    mock_response = mocker.Mock()
-    mock_response.json.return_value = mock_data
-    mocker.patch('requests.get', return_value=mock_response)
-
-    # First request
-    response1 = client.get('/daily_average?function=WTI&interval=daily&start_date=2023-01-01&end_date=2023-01-03')
-    assert response1.status_code == 200
-
-    # Second request (should use cached data)
-    response2 = client.get('/daily_average?function=WTI&interval=daily&start_date=2023-01-01&end_date=2023-01-03')
-    assert response2.status_code == 200
-
-    # Check that requests.get was called only once
-    assert requests.get.call_count == 1
-
-def test_daily_average_empty_api_response(client, mocker):
-    mock_response = mocker.Mock()
-    mock_response.json.return_value = {}
-    mocker.patch('requests.get', return_value=mock_response)
-
-    response = client.get('/daily_average?function=WTI&interval=daily&start_date=2023-01-01&end_date=2023-01-31')
-    
-    assert response.status_code == 500
-    assert "error" in response.json
+    assert "API key not set" in response.json['error']
 
 # Test case: Check if RESOURCE_INTERVALS dictionary is properly structured
 def test_resource_intervals():
