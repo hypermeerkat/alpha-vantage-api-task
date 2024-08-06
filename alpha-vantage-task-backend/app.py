@@ -82,18 +82,24 @@ def daily_average():
     if average is None:
         return jsonify({
             "error": f"No valid data available for the specified date range: {start_date} to {end_date}. "
-                     f"Available date range: {data['data'][-1]['date']} to {data['data'][0]['date']}"
+                    f"Available date range: {data['data'][-1]['date']} to {data['data'][0]['date']}"
         }), 400
-    
+
+    daily_prices = [
+        {"date": entry['date'], "price": float(entry['value'])}
+        for entry in data['data']
+        if start_date <= entry['date'] <= end_date
+    ]
+
     return jsonify({
         "function": function,
         "interval": interval,
         "start_date": start_date,
         "end_date": end_date,
         "average_price": round(average, 2),
-        "currency": "USD per unit"
+        "currency": "USD per unit",
+        "daily_prices": daily_prices
     })
-
 if __name__ == "__main__":
     port = int(os.environ.get("PORT", 80))
     app.run(host='0.0.0.0', port=port)

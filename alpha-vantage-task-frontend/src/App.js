@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend } from 'recharts';
+import { BarChart, Bar, LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend } from 'recharts';
 import './App.css';
 
 const resourceIntervals = {
@@ -73,14 +73,7 @@ function App() {
     }
   };
 
-  const chartData = result
-    ? [
-        {
-          name: `${result.function} (${result.interval})`,
-          price: result.average_price,
-        },
-      ]
-    : [];
+  const chartData = result ? result.daily_prices : [];
 
   return (
     <div className="App">
@@ -177,15 +170,15 @@ function App() {
       )}
       {result && (
         <div className="chart">
-          <h2>Price Visualization</h2>
-          <BarChart width={600} height={300} data={chartData}>
+          <h2>Price Trend</h2>
+          <LineChart width={600} height={300} data={chartData}>
             <CartesianGrid strokeDasharray="3 3" />
-            <XAxis dataKey="name" />
+            <XAxis dataKey="date" />
             <YAxis />
             <Tooltip />
             <Legend />
-            <Bar dataKey="price" fill="#8884d8" />
-          </BarChart>
+            <Line type="monotone" dataKey="price" stroke="#8884d8" />
+          </LineChart>
         </div>
       )}
     </div>
