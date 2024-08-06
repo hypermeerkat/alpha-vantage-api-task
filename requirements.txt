@@ -5,3 +5,4 @@ pytest
 pytest-mock
 flask-cors
 cachetools
+flask-caching
