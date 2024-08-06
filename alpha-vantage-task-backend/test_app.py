@@ -1,4 +1,5 @@
 import pytest
+from flask import jsonify
 from app import app, RESOURCE_INTERVALS
 import requests
 from utils import calculate_daily_average, print_api_data
