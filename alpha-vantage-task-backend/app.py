@@ -9,6 +9,7 @@ from flask_caching import Cache
 from flask.logging import create_logger
 import json
 from flask_cors import CORS
+import logging
 
 # Load environment variables from .env file
 load_dotenv()
@@ -17,7 +18,7 @@ load_dotenv()
 app = Flask(__name__)
 app.config['CACHE_TYPE'] = 'simple'
 cache = Cache(app)
-app_logger = create_logger(app)
+app_logger = logging.getLogger(__name__)
 CORS(app)
 
 # Define available resources and their corresponding intervals
@@ -99,11 +100,14 @@ def daily_average():
             }), 400
 
         # Prepare the daily prices data for the response
-        daily_prices = [
-            {"date": entry['date'], "price": float(entry['value'])}
-            for entry in data['data']
-            if start_date <= entry['date'] <= end_date
-        ]
+        daily_prices = []
+        for entry in data['data']:
+            if start_date <= entry['date'] <= end_date:
+                try:
+                    price = float(entry['value'])
+                    daily_prices.append({"date": entry['date'], "price": price})
+                except ValueError:
+                    app_logger.warning(f"Skipped invalid price value '{entry['value']}' for date {entry['date']}")
 
         # Prepare the final result
         result = {
