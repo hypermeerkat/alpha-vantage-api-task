@@ -2,6 +2,8 @@ import React, { useState, useEffect } from 'react';
 import { BarChart, Bar, LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend } from 'recharts';
 import './App.css';
 
+const getCurrentDate = () => new Date().toISOString().split('T')[0];
+
 const resourceIntervals = {
   WTI: ['daily', 'weekly', 'monthly'],
   BRENT: ['daily', 'weekly', 'monthly'],
@@ -133,6 +135,7 @@ function App() {
             type="date"
             value={startDate}
             onChange={(e) => setStartDate(e.target.value)}
+            max={getCurrentDate()}
           />
         </label>
       </div>
@@ -143,6 +146,7 @@ function App() {
             type="date"
             value={endDate}
             onChange={(e) => setEndDate(e.target.value)}
+            max={getCurrentDate()}
           />
         </label>
       </div>
