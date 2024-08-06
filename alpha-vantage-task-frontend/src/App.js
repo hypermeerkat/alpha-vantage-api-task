@@ -48,7 +48,8 @@ function App() {
     }
   
     try {
-      const backendUrl = process.env.REACT_APP_BACKEND_URL || 'https://alpha-vantage-task-backend.azurewebsites.net';      const url = `${backendUrl}/daily_average?function=${resource}&interval=${interval}&start_date=${startDate}&end_date=${endDate}`;
+      const backendUrl = process.env.REACT_APP_BACKEND_URL || 'https://alpha-vantage-task-backend.azurewebsites.net';
+      const url = `${backendUrl}/daily_average?function=${resource}&interval=${interval}&start_date=${startDate}&end_date=${endDate}`;
       console.log('Fetching from URL:', url);
       const response = await fetch(url, {
         method: 'GET',
@@ -58,6 +59,11 @@ function App() {
         },
       });
       
+      const contentType = response.headers.get("content-type");
+      if (!contentType || !contentType.includes("application/json")) {
+        throw new Error("Oops! Received non-JSON response from server");
+      }
+
       if (!response.ok) {
         const errorData = await response.json();
         throw new Error(errorData.error || `HTTP error! status: ${response.status}`);
@@ -153,6 +159,11 @@ function App() {
     {error.includes('No valid data available') && (
       <p>
         The selected date range might be too recent or in the future. Please try selecting an earlier date range.
+      </p>
+    )}
+    {error.includes('Received non-JSON response') && (
+      <p>
+        The server encountered an unexpected error. Please try again later or contact support if the issue persists.
       </p>
     )}
   </div>
