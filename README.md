@@ -88,7 +88,7 @@ The frontend of the application is publicly accessible at [https://alpha-vantage
    npm start
    ```
 
-4. Note that some the environment configurations will need to be changes when developing locally. For example, the `REACT_APP_API_URL` environment variable will need to be set to `http://localhost:5000` when developing locally. The preferred method is to use a .env file to store these variables. If possible development should be done in a containerised environment and deployed to Azure using the CI/CD pipeline.
+4. Note that some of the environment configurations will need to be changed when developing locally. For example, the `REACT_APP_API_URL` environment variable will need to be set to `http://localhost:5000` when developing locally. The preferred method is to use a .env file to store these variables. If possible development should be done in a containerised environment and deployed to Azure using the CI/CD pipeline.
 
 
 ### Running with Docker Compose
