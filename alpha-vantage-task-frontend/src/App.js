@@ -85,7 +85,7 @@ function App() {
     }
   };
 
-  const chartData = result ? result.daily_prices : [];
+  const chartData = result ? [...result.daily_prices].sort((a, b) => new Date(a.date) - new Date(b.date)) : [];
 
   return (
     <div className="App">
