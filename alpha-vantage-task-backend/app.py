@@ -35,7 +35,10 @@ def daily_average():
     interval = request.args.get('interval', 'daily')
     start_date = request.args.get('start_date')
     end_date = request.args.get('end_date')
-    api_key = os.getenv('ALPHA_VANTAGE_API_KEY', 'demo')
+    api_key = os.getenv('ALPHA_VANTAGE_API_KEY')
+
+    if not api_key:
+        return jsonify({"error": "API key not set"}), 500
 
     if function not in RESOURCE_INTERVALS:
         return jsonify({"error": f"Invalid resource: {function}"}), 400
@@ -44,7 +47,19 @@ def daily_average():
         return jsonify({"error": f"Invalid interval '{interval}' for resource '{function}'. Valid intervals are: {', '.join(RESOURCE_INTERVALS[function])}"}), 400
 
     if not start_date or not end_date:
-        return jsonify({"error": f"Start date and end date are required. Received: start_date={start_date}, end_date={end_date}"}), 400
+        return jsonify({"error": "Start date and end date are required"}), 400
+
+    try:
+        start_date = datetime.strptime(start_date, '%Y-%m-%d')
+        end_date = datetime.strptime(end_date, '%Y-%m-%d')
+    except ValueError:
+        return jsonify({"error": "Invalid date format. Use YYYY-MM-DD"}), 400
+
+    if start_date > end_date:
+        return jsonify({"error": "Start date cannot be after end date"}), 400
+
+    if (end_date - start_date).days > 365:
+        return jsonify({"error": "Date range exceeds maximum allowed (1 year)"}), 400
 
     cache_key = f"{function}_{interval}"
     cached_data = cache.get(cache_key)
@@ -54,7 +69,7 @@ def daily_average():
         
         try:
             response = requests.get(url)
-            response.raise_for_status()  # Raises an HTTPError for bad responses
+            response.raise_for_status()
             data = response.json()
             
             if 'Information' in data:
@@ -63,10 +78,9 @@ def daily_average():
             if 'Error Message' in data:
                 return jsonify({"error": data['Error Message']}), 400
 
-            # Print the full API response for debugging
-            print("Full API Response:", json.dumps(data, indent=2))
+            if 'data' not in data or not data['data']:
+                return jsonify({"error": "Unexpected API response format"}), 500
 
-            # Cache the API response
             cache[cache_key] = json.dumps(data)
         except requests.RequestException as e:
             return jsonify({"error": f"API request failed: {str(e)}. URL: {url}"}), 500
@@ -75,21 +89,21 @@ def daily_average():
     else:
         data = json.loads(cached_data)
 
-    print_api_data(data, start_date, end_date)
+    print_api_data(data, start_date.strftime('%Y-%m-%d'), end_date.strftime('%Y-%m-%d'))
 
     average = calculate_daily_average(data, start_date, end_date)
     
     if average is None:
         return jsonify({
-            "error": f"No valid data available for the specified date range: {start_date} to {end_date}. "
+            "error": f"No valid data available for the specified date range: {start_date.strftime('%Y-%m-%d')} to {end_date.strftime('%Y-%m-%d')}. "
                      f"Available date range: {data['data'][-1]['date']} to {data['data'][0]['date']}"
         }), 400
     
     return jsonify({
         "function": function,
         "interval": interval,
-        "start_date": start_date,
-        "end_date": end_date,
+        "start_date": start_date.strftime('%Y-%m-%d'),
+        "end_date": end_date.strftime('%Y-%m-%d'),
         "average_price": round(average, 2),
         "currency": "USD per unit"
     })
