@@ -40,13 +40,13 @@ function App() {
     setIsLoading(true);
     setError(null);
     setResult(null);
-  
+
     if (!startDate || !endDate) {
       setError("Please select both start and end dates.");
       setIsLoading(false);
       return;
     }
-  
+
     try {
       const backendUrl = process.env.REACT_APP_BACKEND_URL || 'https://alpha-vantage-task-backend.azurewebsites.net';
       const url = `${backendUrl}/daily_average?function=${resource}&interval=${interval}&start_date=${startDate}&end_date=${endDate}`;
@@ -60,16 +60,22 @@ function App() {
       });
       
       const contentType = response.headers.get("content-type");
+      console.log('Response content type:', contentType);
+
+      // Log the raw response text
+      const responseText = await response.text();
+      console.log('Raw response:', responseText);
+
       if (!contentType || !contentType.includes("application/json")) {
-        throw new Error("Oops! Received non-JSON response from server");
+        throw new Error(`Received non-JSON response from server. Content-Type: ${contentType}, Response: ${responseText.substring(0, 200)}...`);
       }
 
       if (!response.ok) {
-        const errorData = await response.json();
+        const errorData = JSON.parse(responseText);
         throw new Error(errorData.error || `HTTP error! status: ${response.status}`);
       }
       
-      const data = await response.json();
+      const data = JSON.parse(responseText);
       setResult(data);
     } catch (err) {
       console.error('Fetch error:', err);
